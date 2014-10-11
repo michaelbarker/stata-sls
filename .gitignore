@@ -1,3 +1,9 @@
+# Stata Data Sets
+*.dta
+# Compiled Mata Libraries
+*.mlib
+
+
 # Compiled Object files
 *.slo
 *.lo
