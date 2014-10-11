@@ -22,8 +22,9 @@
 {synopthdr}
 {synoptline}
 {syntab:Main}
-{synopt:{opt tr:im(#,#)}}lower and upper trimming centiles. Default is trim(1,99){p_end}
-{synopt:{cmdab:init(}{it:{help sls##init_options:init_options}}{cmd:)}}specify moptimize_init options for minimization{p_end}
+{synopt:{opt tr:im(#,#)}}lower and upper trimming centiles. Default is trim(1,99).{p_end}
+{synopt:{opt pilot}}use pilot bandwidth only. Default is simultaneous bandwidth estimation.{p_end}
+{synopt:{cmdab:init(}{it:{help sls##init_options:init_options}}{cmd:)}}specify moptimize_init options for minimization.{p_end}
 {synoptline}
 {p2colreset}{...}
 
@@ -62,6 +63,15 @@ wish to completely exclude certain observations should use {ifin} statements. Th
 trimming centiles are (1,99). Bounds of 0 or 100 may be specified if no trimming is desired
 on the lower or upper tail, respectively. 
 
+{phang}
+{opt pilot} specifies that the pilot bandwith calculation be used for the entire estimation 
+procedure. The pilot bandwidth is a plug-in estimate that follows the Silverman rule-of-thumb.
+For actual bandwidth values, I used values given in lecture notes by Bruce E. Hansen. 
+The default procedure first goes through several iterations using the pilot bandwidth,
+then minimizes bandwidth simultaneously with the squared error objective function.
+This option follows the same procedure, but constrains the bandwidth to the final pilot
+bandwidth estimate during the simultaneous minimization procedure.
+
 {marker init_options}{...}
 {phang}
 {opt init(init_options)} passes {help mf_moptimize##syn_step2:moptimize_init} options directly to moptimize problem.
@@ -83,15 +93,27 @@ For example, the moptimize option, {...}
 would be specified as {cmd:search("on")} or {cmd:search("off")}. 
 
 
-{title:Examples}
+{title:Example: Predicted Values}
 
-{phang}{cmd:. sls y1 x1 x2 x3}
+{phang}{cmd:. sysuse auto}{p_end}
+{phang}{cmd:. sls mpg weight length displacement}{p_end}
+{phang}{cmd:. predict mpghat, ey}{p_end}
+{phang}{cmd:. predict Index , xb}{p_end}
+{phang}{cmd:. twoway (scatter mpg Index) (line mpghat I , sort) , xtitle("Index") ytitle("MPG") legend(label(1 "Actual") label(2 "Predicted")) }{p_end}
 
-{phang}{cmd:. sls y1 x1 x2 x3, init(tracelevel("step"), eq_coefs(1, (1,0.75)))}
+
+{title:Example: Init Options}
+
+{phang}{cmd:. sysuse auto}{p_end}
+{phang}{cmd:. sls mpg weight length displacement, init( trace_coefs("on"), eq_coefs(1, (20,5)) , search("off") , conv_maxiter(50) )}{p_end}
 
 
 {marker references}{...}
 {title:References}
+
+{p 0 4}Hansen, Bruce E. (2009). 
+“Lecture Notes on Nonparametrics 2: Kernel Density Estimation.” 
+University of Wisconsin.
 
 {p 0 4}Hardle, W., Hall, P., & Ichimura, H. (1993). 
 Optimal Smoothing in Single-Index Models. 
@@ -104,6 +126,10 @@ Journal of Econometrics, 58(1-2), 71–120.
 {* {p 0 4}Newey, W. K., Hsieh, F., & Robins, J. M. (2004).}
 {* Twicing Kernels and a Small Bias Property of Semiparametric Estimators.} 
 {* Econometrica, 72(3), 947–962.}
+
+{p 0 4}Silverman, B. W. (1986). 
+Density Estimation. 
+London: Chapman and Hall.
 
 
 {title:Author}

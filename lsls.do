@@ -90,7 +90,7 @@ struct cexp_parameters scalar cexp_define(
  Pass conditional expectation input data and parameters to chosen evaluator
  Return conditional expectation vector
 
- Description of twicing as a discrete process from:
+Description of twicing as a discrete process from:
 Smoothing Techniques for Curve Estimation
 Lecture Notes in Mathematics Volume 757, 1979, pp 191-195
 W Stuetzle, Y Mittal - Smoothing techniques for curve estimation, 1979

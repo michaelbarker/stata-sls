@@ -6,6 +6,13 @@
 2013-12-11 - changed trimming to include observations exactly at the cutoff.
 Otherwise, all observations may be trimmed from binary dependent variables.
 
+Todo: 
+ Add number of obs and root MSE
+ Check Versioning
+ Write example in help file
+ Add "pilot" option to help file
+ Add option for gf vs. qf
+
 *******************************************************************************/
 
 
@@ -21,7 +28,11 @@ program sls
 end
 
 program Replay
+	version 11
 	syntax
+	di as text _col(55) "Number of obs = " as result %8.0f e(N)
+*	di as text _col(55) "SSE           = " as result %8.0g e(sse)
+	di as text _col(55) "root MSE      = " as result %8.0g e(rmse)
 	ereturn display
 end
 
@@ -53,7 +64,7 @@ syntax varlist(min=2 numeric) [if] [in] , 	///
 	if `1'<0 | `2'>100 	error 125
 	
 	* create indicator trimming vector: 0 is trimmed.
-	gen int `tx'=1 if `touse'
+	quietly: gen int `tx'=1 if `touse'
 	foreach var of varlist `xvars' {
 		if `1'>0 {
 			_pctile `var' if `touse' , p(`1')
@@ -103,7 +114,7 @@ syntax varlist(min=2 numeric) [if] [in] , 	///
 	mata: sls_CE(`M')	
 
 	* User-Specified Init Options
-	np_moptimize_options `M' , `initoptions' 
+	_sls_init_options `M' , `initoptions' 
 
 	* Solve with pilot bandwidth to get bw bounds and starting values 
 	local maxiter 5
@@ -153,6 +164,8 @@ syntax varlist(min=2 numeric) [if] [in] , 	///
 	ereturn post `b' `V' , obs(`N') esample(`touse') depname("`y'") properties("b V")
 	
 	* Additional return values
+	tempname rmse 
+	scalar `rmse' = sqrt(`SSE' / `N')
 
 	* locals
 	ereturn local depvar "`y'"
@@ -164,7 +177,8 @@ syntax varlist(min=2 numeric) [if] [in] , 	///
 	ereturn local predict "sls_p"
 
 	* scalars
-	ereturn scalar SSE = `SSE' 
+	ereturn scalar sse = `SSE' 
+	ereturn scalar rmse = `rmse'
 	ereturn scalar iterations = `iterations' 
 	ereturn scalar converged = `converged' 
 
@@ -178,6 +192,7 @@ syntax varlist(min=2 numeric) [if] [in] , 	///
 end
 
 // Enter Mata
+version 11
 mata
 
 /*******************************************************************************
