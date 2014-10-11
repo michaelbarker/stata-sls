@@ -2,6 +2,8 @@
  Predict routine for sls.ado
 *******************************************************************************/
 
+*! sls_p version 1.0 2014-10-11 
+*! author: Michael Barker mdb96@georgetown.edu
 
 program sls_p 
 	version 11

@@ -1,22 +1,15 @@
 /*******************************************************************************
 
- Mike Barker
- Ichimura 1993 SLS estimator
+Mike Barker
+Ichimura 1993 SLS estimator
 
 2013-12-11 - changed trimming to include observations exactly at the cutoff.
 Otherwise, all observations may be trimmed from binary dependent variables.
 
-Todo: 
- Add number of obs and root MSE
- Check Versioning
- Write example in help file
- Add "pilot" option to help file
- Add option for gf vs. qf
-
 *******************************************************************************/
 
-
-*! sls v1.0.0 Mike Barker 22nov2013
+*! sls version 1.0 2014-10-11 
+*! author: Michael Barker mdb96@georgetown.edu
 
 program sls
 	version 11
@@ -114,7 +107,7 @@ syntax varlist(min=2 numeric) [if] [in] , 	///
 	mata: sls_CE(`M')	
 
 	* User-Specified Init Options
-	_sls_init_options `M' , `initoptions' 
+	_init_options `M' , `initoptions' 
 
 	* Solve with pilot bandwidth to get bw bounds and starting values 
 	local maxiter 5

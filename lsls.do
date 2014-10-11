@@ -9,13 +9,12 @@ Updates
 
 *******************************************************************************/
 
+*! lsls.do version 1.0 2014-10-11 
+*! author: Michael Barker mdb96@georgetown.edu
+
 version 11
 program drop _all
-/*
-* Copy most recent cxp plugin
-capture: rm cxp.dll
-copy plugin/cxp.dll cxp.dll
-*/
+
 * Clear Mata 
 mata 
 mata clear
@@ -132,109 +131,6 @@ real matrix cexp( real matrix y, real matrix X, struct cexp_parameters CE,
     return(cexp)
 }
 
-/*
-/*******************************************************************************
- Derivative of CEXP evaluator: 
- Pass conditional expectation input data and parameters to chosen evaluator
- Return derivative of conditional expectation vector
-*******************************************************************************/
-real matrix dcexpdb( real matrix y, real matrix X, struct cexp_parameters CE, 
-                | real vector tx, real vector h) {  
-
-    // db "Conditional Expectation Called"
-
-    // If indicator trimming vector and bandwidth were not passed, 
-    if (args()==3) {
-    	// use a vector of ones. -> compute cond. exp. for all observations. 
-        tx = J(rows(X),1,1) 
-		// Calculate optimal bandwidth
-    	h=(*CE.bwidth)(y,X,CE,tx)
-    }
-	
-	// Trimming vector passed but bandwidth was not
-	else if (args()==4) {
-		// Calculate optimal bandwidth
-    	h=(*CE.bwidth)(y,X,CE,tx)
-	}
-
-	// Update current bandwidth
-	CE.optbwidth=h
-
-    // calculate conditional expectation
-	real matrix d1cexp
-    d1cexp = d1cexp_vec(y,X,CE,tx)
-
-    return(d1cexp)
-}
-*/
-
-/*
-/*******************************************************************************
- Derivative of CEXP evaluator wrt bandwidth parameter: 
- Pass conditional expectation input data and parameters to chosen evaluator
- Return derivative of conditional expectation vector
-*******************************************************************************/
-real matrix dh1cexp( real matrix y, real matrix X, struct cexp_parameters CE, 
-                | real vector tx, real vector h) {  
-
-    // db "Conditional Expectation Called"
-
-    // If indicator trimming vector and bandwidth were not passed, 
-    if (args()==3) {
-    	// use a vector of ones. -> compute cond. exp. for all observations. 
-        tx = J(rows(X),1,1) 
-		// Calculate optimal bandwidth
-    	h=(*CE.bwidth)(y,X,CE,tx)
-    }
-	
-	// Trimming vector passed but bandwidth was not
-	else if (args()==4) {
-		// Calculate optimal bandwidth
-    	h=(*CE.bwidth)(y,X,CE,tx)
-	}
-
-	// Update current bandwidth
-	CE.optbwidth=h
-
-    // calculate conditional expectation
-	real matrix dh1cexp
-    dh1cexp = dh1cexp_vec(y,X,CE,tx)
-
-    return(dh1cexp)
-}
-*/
-
-/*******************************************************************************
- Compute conditional expectation using C-plugin.
- Data is saved in Stata in temporary variables, (Y, X1, X2, ... , Result)
- Stata calls plugin and passes data.
- Plugin computes cexp and saves result in Stata
- Mata pulls result from Stata
- * Not yet updated for multiple indpendent/weight variables
-*******************************************************************************/
-real vector cexp_plugin(real vector y , real matrix X , 
-                        struct cexp_parameters scalar CE ,
-                        real vector tx) { 
-	// Declarations
-	string vector names
-	string scalar namelist
-	real vector idx, cexp
-
-    // Create new tempvars
-    names = st_tempname(cols(X)+3)
-    idx = st_addvar("double" , names) 
-    
-    st_store( (1,rows(X)) , idx[|1 \ cols(idx)-1|] , (y,X,tx) )
-    
-    // Call plugin estimator 
-    namelist=invtokens(names)
-    stata("kvcexp_plugin " + namelist) 
-    
-    // Save return value and drop tempvars
-    cexp = st_data((1,rows(X)) , idx[cols(idx)])
-    stata("drop " + namelist) 
-    return(cexp)
-}
 
 /*******************************************************************************
  Kernel weighted distance using NxN matrix.
@@ -292,7 +188,7 @@ real matrix cexp_mat(real matrix y, real matrix X,
 
 /*******************************************************************************
  Conditional Expectation Vector Method: 
- Computer kernel density by observation/vector
+ Compute kernel density by observation/vector
 *******************************************************************************/
 real matrix cexp_vec(real matrix y , real matrix X ,
                      struct cexp_parameters scalar CE ,
@@ -1021,10 +917,10 @@ void st_itrim(string scalar varlist, string scalar touse,
  Save function library 
 *******************************************************************************/
 
-mata mlib create lsls, dir(PERSONAL) replace
-// mata mlib create lnonparam, replace
+// mata mlib create lsls, dir(PERSONAL) replace
+mata mlib create lsls, replace
 mata mlib add lsls *()
-// If no errors, 32 new functions were added.
+// If no errors, 31 new functions were added.
 mata mlib index
 mata set matastrict off
 end

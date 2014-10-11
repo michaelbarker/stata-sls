@@ -3,7 +3,10 @@
  Set Moptimize Init Options Directly
 *******************************************************************************/
 
-program define _sls_init_options
+*! _init_options version 1.0 2014-10-11 
+*! author: Michael Barker mdb96@georgetown.edu
+
+program define _init_options
     version 11
     # delimit ;
     syntax name(name=M),

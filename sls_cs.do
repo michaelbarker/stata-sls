@@ -1,6 +1,19 @@
+
+version 11
+
+sysdir set PERSONAL "$GITHUB\sls"
+sysdir set PLUS "$GITHUB\sls"
+sysdir set OLDPLACE "$GITHUB\sls"
+
+sysdir
+
+cscript "SLS estimation and postestimation" adofile sls sls_p
+
 discard
 program drop _all
 set more off
+
+do lsls.do
 
 program define slsdata
 	drop _all
@@ -33,8 +46,6 @@ predict double deydb*, deydb
 sls y x1 x2 x3 , pilot 
 
 sls y x1 x2 x3 , init( trace_coefs("on"), search_random("on") , conv_maxiter(50) )
-
-
 
 * Example for Help file
 clear
