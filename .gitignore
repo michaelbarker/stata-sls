@@ -2,7 +2,8 @@
 *.dta
 # Compiled Mata Libraries
 *.mlib
-
+# zip archives for SSC submission
+*.zip
 
 # Compiled Object files
 *.slo

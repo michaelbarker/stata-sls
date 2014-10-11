@@ -99,7 +99,7 @@ would be specified as {cmd:search("on")} or {cmd:search("off")}.
 {phang}{cmd:. sls mpg weight length displacement}{p_end}
 {phang}{cmd:. predict mpghat, ey}{p_end}
 {phang}{cmd:. predict Index , xb}{p_end}
-{phang}{cmd:. twoway (scatter mpg Index) (line mpghat I , sort) , xtitle("Index") ytitle("MPG") legend(label(1 "Actual") label(2 "Predicted")) }{p_end}
+{phang}{cmd:. twoway (scatter mpg Index) (line mpghat Index , sort) , xtitle("Index") ytitle("MPG") legend(label(1 "Actual") label(2 "Predicted")) }{p_end}
 
 
 {title:Example: Init Options}
@@ -137,6 +137,7 @@ London: Chapman and Hall.
 {pstd} Michael Barker {p_end}
 {pstd} Georgetown University {p_end}
 {pstd} mdb96@georgetown.edu {p_end}
+{pstd} https://github.com/michaelbarker/stata-sls {p_end}
 
 
 {title:Also see}
