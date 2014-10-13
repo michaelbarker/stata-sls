@@ -35,6 +35,7 @@ syntax varlist(min=2 numeric) [if] [in] , 	///
 	[INIToptions(passthru) 					///
 	TRim(numlist min=2 max=2 >=0)			///
 	pilot trimvar(varname)					///
+	BANDWidth(numlist min=1 max=1 >0)		///
 	]
 
 	marksample touse
@@ -109,21 +110,28 @@ syntax varlist(min=2 numeric) [if] [in] , 	///
 	* User-Specified Init Options
 	_init_options `M' , `initoptions' 
 
-	* Solve with pilot bandwidth to get bw bounds and starting values 
-	local maxiter 5
-	if "`pilot'"=="pilot" {
-		local maxiter 50
+	* Bandwidth Choices:
+	* User supplied
+	if "`bandwidth'"!="" {
+		mata: sls_setbandwidth(`M' , `bandwidth')
+		mata: constrainbw(`M')	
 	}
-	mata: sls_pilot(`M',`maxiter')
+	* pilot bandwidth Only 
+	else if "`pilot'"=="pilot" {
+		local maxiter 50
+		mata: sls_pilot(`M',`maxiter')
+		mata: moptimize_query(`M')
+		mata: constrainbw(`M')	
+	}
+	* Pilot bandwidth, then bounded optimization 
+	else {
+		local maxiter 5
+		mata: sls_pilot(`M',`maxiter')
+	}
 
 	* Equation for Simultaneous Bandwidth Estimation
 	mata: moptimize_init_eq_name(`M', 2, "LogitBandwidth")
 	mata: moptimize_init_eq_indepvars(`M', 2, "")
-
-	if "`pilot'"=="pilot" { 
-		mata: constrainbw(`M')	
-	}
-	
 	*** Estimate parameters and calculate variance 
 	mata: sls(`M')   
 	
@@ -394,9 +402,28 @@ void sls_pilot(transmorphic scalar M, real scalar maxit) {
 	moptimize_init_eq_coefs(M,1,b)		
 	// Turn off search for final sls estimation
  	moptimize_init_search(M, "off")
+	moptimize_init_search_rescale(M, "off")
 
 }
 
+/*******************************************************************************
+ User Suplied Bandwidth
+ 
+*******************************************************************************/
+void sls_setbandwidth(transmorphic scalar M, real scalar h) {
+	"user specified bandwidth"
+	h
+	ub = 2 :* h 
+	lb = 0.5 :* h
+	// transform bandwidth estimates according to upper and lower bounds
+	h0 = logit((h-lb)/(ub-lb))
+
+	// Save bandwidth estimate and bounds
+	// moptimize_init_eq_coefs(M,2,h0)		
+	moptimize_init_eq_coefs(M,2,h0)		
+	// Save bounds in original moptimize problem
+	moptimize_init_userinfo(M,2,(lb,ub))
+}
 
 /*******************************************************************************
 Subroutine to add bandwidth constraint, so bw is not estimated simultaneously. 
@@ -409,7 +436,7 @@ Subroutine to add bandwidth constraint, so bw is not estimated simultaneously.
 *******************************************************************************/
 
 void constrainbw(transmorphic scalar M) {
-	moptimize_query(M)
+	moptimize_evaluate(M)
 	indices = moptimize_util_eq_indices(M,1)
 	C = (J(1,indices[2,2],0) , 1)
 	c = moptimize_init_eq_coefs(M,2)
